@@ -1,16 +1,16 @@
 package com.staredu.grammar.service;
 
-import com.staredu.grammar.domain.Member;
 import com.staredu.grammar.domain.Score;
-import com.staredu.grammar.repository.MemberRepository;
 import com.staredu.grammar.repository.ScoreRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 @Transactional
 public class GameScoreService {
 
@@ -24,18 +24,15 @@ public class GameScoreService {
     /**
      * 회원가입
      */
-    public Long join(Score score) {
-        validateDuplicateScore(score);
-        scoreRepository.save(score);
+    public void saveScore(Score score) {
 
-        return score.getId();
-    }
+        Optional<Score> existing = scoreRepository.findByDate(score.getDate());
 
-    private void validateDuplicateScore(Score score) {
-        scoreRepository.findByDate(score.getDate())
-                .ifPresent(m ->{
-                    throw new IllegalStateException("이미 존재하는 날짜입니다.");
-                });
+        if (existing.isPresent()) {
+            existing.get().setScore(score.getScore());
+        } else {
+            scoreRepository.save(score);
+        }
     }
 
     /**

@@ -1,69 +1,95 @@
 package com.staredu.grammar.service;
 
-import com.staredu.grammar.domain.Member;
-import com.staredu.grammar.repository.MemoryMemberRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import com.staredu.grammar.domain.Score;
+import com.staredu.grammar.repository.ScoreRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@SpringBootTest
 class ScoreServiceTest {
 
-    //MemberService memberService = new MemberService();
-    //MemoryMemberRepository memberRepository = new MemoryMemberRepository();
+    @Autowired
+    GameScoreService gamescoreService;
 
-    MemberService memberService;
-    MemoryMemberRepository memberRepository;
+    @Autowired
+    ScoreRepository scoreRepository;
 
-    @BeforeEach
-    public void beforeEach() {
-        memberRepository = new MemoryMemberRepository();
-        memberService = new MemberService(memberRepository);
-    }
+//     @BeforeEach
+//    public void beforeEach() {
+//        scoreRepository = new ScoreRepository();
+//        memberService = new MemberService(scoreRepository);
+//    }
 
-    @AfterEach
-    public void afterEach() {
-        memberRepository.clearstore();
-    }
+ //   @AfterEach
+    //     public void afterEach() {
+//        memberRepository.clearstore();
+//    }
 
     @Test
-    void 회원가입() throws Exception{
+    void 점수입력() throws Exception{
         //Given
-        Member member = new Member();
-        member.setName("hello");
+        Score score = new Score();
+        score.setScore(100);
+        score.setDate(LocalDate.now());
 
         //When
-        Long saveId = memberService.join(member);
+        gamescoreService.saveScore(score);
+        LocalDate saveScore = score.getDate();
 
         //then
-        Member findMember = memberRepository.findById(saveId).get();
-        assertThat(member.getName()).isEqualTo(findMember.getName());
+        Score findScore = scoreRepository.findByDate(saveScore).get();
+        assertThat(findScore.getDate()).isEqualTo(saveScore);
     }
 
+//    @Test
+//    void 중복_점수_예외() throws Exception{
+//        //Given
+//        Score score1 = new Score();
+//        score1.setScore(100);
+//
+//        Score score2 = new Score();
+//        score2.setScore(200);
+//
+//        //When
+//        gamescoreService.saveScore(score1);
+//        /*
+//        try {
+//            memberService.join(member2);
+//        } catch (IllegalStateException e) {
+//            assertThat(e.getMessage()).isEqualTo("이미 존재하는 회원입니다.");
+//        }
+//        */
+//        IllegalStateException e = assertThrows(IllegalStateException.class, () -> gamescoreService.saveScore(score2));
+//
+//        assertThat(e.getMessage()).isEqualTo("이미 존재하는 점수입니다.");
+//        //Then
+//    }
+
     @Test
-    void 중복_회원_예외() throws Exception{
-        //Given
-        Member member1 = new Member();
-        member1.setName("spring");
+    void 같은_날짜_마지막_점수_저장() {
 
-        Member member2 = new Member();
-        member2.setName("spring");
+        LocalDate today = LocalDate.now();
 
-        //When
-        memberService.join(member1);
-        /*
-        try {
-            memberService.join(member2);
-        } catch (IllegalStateException e) {
-            assertThat(e.getMessage()).isEqualTo("이미 존재하는 회원입니다.");
-        }
-        */
-        IllegalStateException e = assertThrows(IllegalStateException.class, () -> memberService.join(member2));
+        Score score1 = new Score();
+        score1.setScore(100);
+        score1.setDate(today);
 
-        assertThat(e.getMessage()).isEqualTo("이미 존재하는 이름입니다.");
-        //Then
+        Score score2 = new Score();
+        score2.setScore(200);
+        score2.setDate(today);
+
+        gamescoreService.saveScore(score1);
+        gamescoreService.saveScore(score2);
+
+        Score result = scoreRepository.findByDate(today).get();
+
+        assertThat(result.getScore()).isEqualTo(200);
     }
 
     @Test

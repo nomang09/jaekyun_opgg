@@ -1,13 +1,11 @@
 package com.staredu.grammar.domain;
 
 import java.time.LocalDate;
-import java.util.Date;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import org.springframework.cglib.core.Local;
+
 
 
 @Entity
@@ -40,5 +38,8 @@ public class Score {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public void addScore(Integer add) {
     }
 }
