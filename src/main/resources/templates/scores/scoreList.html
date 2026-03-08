@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+<div class="container">
+  <div>
+    <table>
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>점수</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="score : ${scores}">
+        <td th:text="${score.id}"></td>
+        <td th:text="${score.date}"></td>
+        <td th:text="${score.score}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div> <!-- /container -->
+</body>
+
+</html>
