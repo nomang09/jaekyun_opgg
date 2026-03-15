@@ -12,4 +12,5 @@ public interface ScoreRepository {
     Optional<Score> findByDate(LocalDate date);
     //Optional<Score> findByScore(Integer score);
     List<Score> findAll();
+    void deleteAll();
 }

@@ -1,0 +1,87 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Score Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<h2>Score History</h2>
+
+<p id="noDataMessage" style="color:red;"></p>
+
+<canvas id="scoreChart"></canvas>
+
+<div style="position:absolute; bottom:20px; left:20px;">
+    <form action="/scores/reset" method="post" onsubmit="return confirmReset()">
+
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}"/>
+
+        <input type="hidden" name="reason" id="reasonInput">
+
+        <button type="submit">점수 초기화</button>
+
+    </form>
+</div>
+
+<script th:inline="javascript">
+
+    let scores = /*[[${scores}]]*/ [];
+    scores = JSON.parse(JSON.stringify(scores));
+
+    if(scores.length > 0){
+        scores.forEach(function(score){
+            labels.push(score.date);
+            data.push(score.score);
+        });
+    }
+
+    const ctx = document.getElementById('scoreChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Daily Score',
+                data: data,
+                fill: false,
+                borderColor: 'blue',
+                tension: 0.1
+            }]
+        }
+    });
+
+    function confirmReset(){
+
+        let reason = prompt("왜 점수를 초기화하려고 하나요?");
+
+        if(reason === null || reason.trim() === ""){
+            alert("초기화 이유를 입력해야 합니다.");
+            return false;
+        }
+
+        let confirmDelete = confirm(
+            "지금까지의 모든 점수가 삭제됩니다.\n정말 초기화하시겠습니까?"
+        );
+
+        if(confirmDelete){
+            document.getElementById("reasonInput").value = reason;
+            return true;
+        }
+
+        return false;
+    }
+
+    if(scores.length === 0){
+        document.getElementById("noDataMessage").innerText = "저장된 점수가 없습니다.";
+    }
+
+</script>
+
+</body>
+</html>
