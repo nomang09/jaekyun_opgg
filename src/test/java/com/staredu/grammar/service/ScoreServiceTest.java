@@ -77,11 +77,11 @@ class ScoreServiceTest {
         LocalDate today = LocalDate.now();
 
         Score score1 = new Score();
-        score1.setScore(100);
+        score1.setScore(10);
         score1.setDate(today);
 
         Score score2 = new Score();
-        score2.setScore(200);
+        score2.setScore(30);
         score2.setDate(today);
 
         gamescoreService.saveScore(score1);
@@ -89,7 +89,7 @@ class ScoreServiceTest {
 
         Score result = scoreRepository.findByDate(today).get();
 
-        assertThat(result.getScore()).isEqualTo(200);
+        assertThat(result.getScore()).isEqualTo(30);
     }
 
     @Test

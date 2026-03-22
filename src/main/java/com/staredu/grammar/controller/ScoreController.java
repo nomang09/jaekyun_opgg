@@ -17,6 +17,10 @@ import java.util.List;
 import com.staredu.grammar.domain.ResetLog;
 import com.staredu.grammar.repository.ResetLogRepository;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Controller
 public class ScoreController {
@@ -41,20 +45,16 @@ public class ScoreController {
     }
 
     @GetMapping("/scores/graph")
-    public String graph(Model model){
+    public String graph(Model model) throws Exception {
 
         List<Score> scores = gameScoreService.findScores();
 
-        List<String> dates = scores.stream()
-                .map(score -> score.getDate().toString())
-                .toList();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule()); // 🔥 이거 추가
 
-        List<Integer> scoreValues = scores.stream()
-                .map(Score::getScore)
-                .toList();
+        String scoresJson = objectMapper.writeValueAsString(scores);
 
-        model.addAttribute("dates", dates);
-        model.addAttribute("scoreValues", scoreValues);
+        model.addAttribute("scoresJson", scoresJson);
 
         return "scores/scoreGraph";
     }
