@@ -23,61 +23,33 @@
 
     </form>
 </div>
+<p th:text="${scoresJson}"></p>
 
 <script th:inline="javascript">
 
-    let scores = JSON.parse('[[${scoresJson}]]');
-    scores = JSON.parse(JSON.stringify(scores));
+    let scores = [[${scores}]];
 
-    if(scores.length > 0){
-        scores.forEach(function(score){
-            labels.push(score.date);
-            data.push(score.score);
-        });
-    }
+    let labels = [];
+    let data = [];
+
+    scores.forEach(function(score){
+        labels.push(score.date);
+        data.push(score.score);
+    });
 
     const ctx = document.getElementById('scoreChart');
 
-    if(labels.length > 0){
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Daily Score',
-                    data: data,
-                    fill: false,
-                    borderColor: 'blue',
-                    tension: 0.1
-                }]
-            }
-        });
-    }
-
-    function confirmReset(){
-
-        let reason = prompt("왜 점수를 초기화하려고 하나요?");
-
-        if(reason === null || reason.trim() === ""){
-            alert("초기화 이유를 입력해야 합니다.");
-            return false;
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Daily Score',
+                data: data,
+                borderColor: 'blue'
+            }]
         }
-
-        let confirmDelete = confirm(
-            "지금까지의 모든 점수가 삭제됩니다.\n정말 초기화하시겠습니까?"
-        );
-
-        if(confirmDelete){
-            document.getElementById("reasonInput").value = reason;
-            return true;
-        }
-
-        return false;
-    }
-
-    if(scores.length === 0){
-        document.getElementById("noDataMessage").innerText = "저장된 점수가 없습니다.";
-    }
+    });
 
 </script>
 

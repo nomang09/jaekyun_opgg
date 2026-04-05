@@ -1,10 +1,9 @@
 package com.staredu.grammar.controller;
 
-//import com.staredu.grammar.domain.Member;
 import com.staredu.grammar.domain.Score;
 import com.staredu.grammar.repository.ScoreRepository;
 import com.staredu.grammar.service.GameScoreService;
-//import com.staredu.grammar.service.MemberService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,13 +18,11 @@ import com.staredu.grammar.repository.ResetLogRepository;
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Controller
 public class ScoreController {
 
-    private GameScoreService gameScoreService;
+    private final GameScoreService gameScoreService;
     private final ScoreRepository scoreRepository;
     private final ResetLogRepository resetLogRepository;
 
@@ -45,16 +42,10 @@ public class ScoreController {
     }
 
     @GetMapping("/scores/graph")
-    public String graph(Model model) throws Exception {
+    public String graph(Model model){
 
         List<Score> scores = gameScoreService.findScores();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule()); // 🔥 이거 추가
-
-        String scoresJson = objectMapper.writeValueAsString(scores);
-
-        model.addAttribute("scoresJson", scoresJson);
+        model.addAttribute("scores", scores);
 
         return "scores/scoreGraph";
     }
@@ -85,16 +76,14 @@ public class ScoreController {
     @PostMapping("/scores/reset")
     public String resetScores(String reason) {
 
-        ResetLog log = new ResetLog();
-        log.setReason(reason);
-        log.setResetTime(LocalDateTime.now());
+        //ResetLog log = new ResetLog();
+        //log.setReason(reason);
+        //log.setResetTime(LocalDateTime.now());
 
-        resetLogRepository.save(log);
+        //resetLogRepository.save(log);
 
         scoreRepository.deleteAll();
 
         return "redirect:/scores";
     }
-
-
 }
