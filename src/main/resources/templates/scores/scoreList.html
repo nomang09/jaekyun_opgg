@@ -1,28 +1,140 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 
-<body>
-<div class="container">
-  <div>
-    <table>
-      <thead>
-      <tr>
-        <th>#</th>
-        <th>점수</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="score : ${scores}">
-        <td th:text="${score.id}"></td>
-        <td th:text="${score.date}"></td>
-        <td th:text="${score.score}"></td>
-      </tr>
-      </tbody>
-    </table>
-    <br>
-    <a href="/scores/graph">점수 그래프 보기</a>
-  </div>
-</div> <!-- /container -->
-</body>
+<head>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
 
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #eee;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container">
+  <div style="display: flex;">
+
+    <!-- 왼쪽: 점수표 -->
+    <div style="width: 300px;">
+      <table>
+        <thead>
+        <tr>
+<!--          <th>#</th>-->
+          <th>날짜</th>
+          <th>점수</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="score, stat : ${scores}"
+            th:attr="data-index=${stat.index}">
+<!--          <td th:text="${score.id}"></td>-->
+          <td th:text="${score.date}"></td>
+          <td th:text="${score.score}"></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 오른쪽: 그래프 -->
+    <div style="flex-grow: 1; padding-left: 50px; height: 400px;">
+      <canvas id="scoreChart"></canvas>
+    </div>
+
+  </div>
+</div>
+
+<script th:inline="javascript">
+
+  let scores = [[${scores}]];
+
+  let labels = [];
+  let data = [];
+
+  scores.forEach(function(score){
+
+    let date = score.date;
+
+    if(Array.isArray(date)){
+      date = date.join('-');
+    }
+
+    labels.push(date);
+    data.push(score.score);
+  });
+
+  const ctx = document.getElementById('scoreChart');
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Daily Score',
+        data: data,
+        borderColor: 'blue'
+      }]
+    },
+    options: {
+      maintainAspectRatio: false
+    }
+  });
+  const rows = document.querySelectorAll("tbody tr");
+
+  rows.forEach((row, index) => {
+
+    row.addEventListener("mouseenter", function () {
+
+      if (!chart) return; // 🔥 안전장치
+
+      const meta = chart.getDatasetMeta(0);
+      const point = meta.data[index];
+
+      if (!point) return; // 🔥 index 범위 방지
+
+      chart.setActiveElements([
+        { datasetIndex: 0, index: index }
+      ]);
+
+      chart.tooltip.setActiveElements(
+              [{ datasetIndex: 0, index: index }],
+              { x: point.x, y: point.y }
+      );
+
+      chart.update();
+    });
+
+    row.addEventListener("mouseleave", function () {
+
+      chart.setActiveElements([]);
+      chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+      chart.update();
+    });
+
+  });
+</script>
+
+</body>
 </html>
