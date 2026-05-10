@@ -39,6 +39,13 @@
 
     <!-- 왼쪽: 점수표 -->
     <div style="width: 300px;">
+        <input type="date" id="searchDate">
+        <button onclick="highlightDate()">검색</button>
+        <br><br>
+
+
+
+
       <table>
         <thead>
         <tr>
@@ -61,6 +68,9 @@
     <!-- 오른쪽: 그래프 -->
     <div style="flex-grow: 1; padding-left: 50px; height: 400px;">
       <canvas id="scoreChart"></canvas>
+        <p id="message"
+           style="color:red; text-align:center; margin-top:15px;">
+        </p>
     </div>
 
   </div>
@@ -75,14 +85,20 @@
 
   scores.forEach(function(score){
 
-    let date = score.date;
+      let date = score.date;
 
-    if(Array.isArray(date)){
-      date = date.join('-');
-    }
+      if(Array.isArray(date)){
+          date = date.join('-');
+      }
 
-    labels.push(date);
-    data.push(score.score);
+      date = date
+          .split('-')
+          .map(num => String(num).padStart(2, '0'))
+          .join('-');
+
+      labels.push(date);
+      data.push(score.score);
+
   });
 
   const ctx = document.getElementById('scoreChart');
@@ -134,6 +150,72 @@
     });
 
   });
+
+  function highlightDate(){
+
+      let inputDate = document.getElementById("searchDate").value;
+
+      let found = false;
+
+      const rows = document.querySelectorAll("tbody tr");
+
+      rows.forEach((row, index) => {
+
+          // 기존 강조 제거
+          row.style.backgroundColor = "";
+
+          let rowDate = labels[index];
+
+          // 날짜 형식 맞추기
+          if(Array.isArray(rowDate)){
+              rowDate = rowDate.join('-');
+          }
+
+          // 월/일 0 붙이기
+          rowDate = rowDate
+              .split('-')
+              .map(num => num.padStart(2, '0'))
+              .join('-');
+
+          // 검색 성공
+          if(rowDate === inputDate){
+
+              found = true;
+
+              // 표 강조
+              row.style.backgroundColor = "yellow";
+
+              // 그래프 툴팁 표시
+              chart.setActiveElements([
+                  { datasetIndex: 0, index: index }
+              ]);
+
+              const point = chart.getDatasetMeta(0).data[index];
+
+              chart.tooltip.setActiveElements([
+                  { datasetIndex: 0, index: index }
+              ], {
+                  x: point.x,
+                  y: point.y
+              });
+
+              chart.update();
+          }
+
+      });
+
+      // 검색 실패
+      if(!found){
+
+          const message = document.getElementById("message");
+
+          message.innerText = "그 날 게임을 한 기록이 없습니다.";
+
+          setTimeout(function(){
+              message.innerText = "";
+          }, 2000);
+      }
+  }//수정
 </script>
 
 </body>

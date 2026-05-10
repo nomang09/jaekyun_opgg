@@ -41,13 +41,9 @@
     <div style="width: 300px;">
         <input type="date" id="searchDate">
         <button onclick="highlightDate()">검색</button>
-
         <br><br>
 
-        <input type="date" id="startDate">
-        <input type="date" id="endDate">
-        <button onclick="filterGraphByDateRange()">범위 검색</button>
-        <button onclick="resetGraph()">초기화</button>
+
 
 
       <table>
@@ -84,22 +80,25 @@
 
   let scores = [[${scores}]];
 
-  let originalLabels = [];
-  let originalData = [];
+  let labels = [];
+  let data = [];
 
   scores.forEach(function(score){
 
-    let date = score.date;
+      let date = score.date;
 
-    if(Array.isArray(date)){
-      date = date.join('-');
-    }
+      if(Array.isArray(date)){
+          date = date.join('-');
+      }
+
+      date = date
+          .split('-')
+          .map(num => String(num).padStart(2, '0'))
+          .join('-');
 
       labels.push(date);
       data.push(score.score);
 
-      originalLabels.push(date);
-      originalData.push(score.score);
   });
 
   const ctx = document.getElementById('scoreChart');
@@ -217,37 +216,6 @@
           }, 2000);
       }
   }//수정
-
-  function filterGraphByDateRange(){
-
-      let startDate = document.getElementById("startDate").value;
-      let endDate = document.getElementById("endDate").value;
-
-      let filteredLabels = [];
-      let filteredData = [];
-
-      originalLabels.forEach((label, index) => {
-
-          if(label >= startDate && label <= endDate){
-
-              filteredLabels.push(label);
-              filteredData.push(originalData[index]);
-          }
-      });
-
-      chart.data.labels = filteredLabels;
-      chart.data.datasets[0].data = filteredData;
-
-      chart.update();
-  }
-
-  function resetGraph(){
-
-      chart.data.labels = originalLabels;
-      chart.data.datasets[0].data = originalData;
-
-      chart.update();
-  }
 </script>
 
 </body>
